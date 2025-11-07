@@ -1,0 +1,119 @@
+{
+  "title" : "CPU Usage Dashboard",
+  "uid" : "cpu-usage-dashboard",
+  "tags" : [ "demo", "prometheus", "monitoring", "cpu" ],
+  "timezone" : "browser",
+  "schemaVersion" : 38,
+  "version" : 1,
+  "refresh" : "5s",
+  "time" : {
+    "from" : "now-15m",
+    "to" : "now"
+  },
+  "timepicker" : {
+    "refresh_intervals" : [ "5s", "10s", "30s", "1m", "5m" ]
+  },
+  "panels" : [ {
+    "id" : 1,
+    "type" : "timeseries",
+    "title" : "CPU Usage",
+    "description" : "CPU usage percentage across all instances. Alert threshold is set at 80%.",
+    "gridPos" : {
+      "h" : 9,
+      "w" : 24,
+      "x" : 0,
+      "y" : 0
+    },
+    "datasource" : {
+      "type" : "prometheus",
+      "uid" : "DS_PROMETHEUS_UID"
+    },
+    "targets" : [ {
+      "datasource" : {
+        "type" : "prometheus",
+        "uid" : "DS_PROMETHEUS_UID"
+      },
+      "expr" : "cpu_usage",
+      "refId" : "A",
+      "legendFormat" : "{{instance}}",
+      "instant" : false,
+      "range" : true
+    } ],
+    "fieldConfig" : {
+      "defaults" : {
+        "unit" : "percent",
+        "min" : 0,
+        "max" : 100,
+        "color" : {
+          "mode" : "thresholds"
+        },
+        "thresholds" : {
+          "mode" : "absolute",
+          "steps" : [ {
+            "color" : "green",
+            "value" : null
+          }, {
+            "color" : "yellow",
+            "value" : 60
+          }, {
+            "color" : "red",
+            "value" : 80
+          } ]
+        },
+        "custom" : {
+          "drawStyle" : "line",
+          "lineInterpolation" : "linear",
+          "barAlignment" : 0,
+          "lineWidth" : 1,
+          "fillOpacity" : 10,
+          "gradientMode" : "none",
+          "spanNulls" : false,
+          "showPoints" : "never",
+          "pointSize" : 5,
+          "stacking" : {
+            "mode" : "none",
+            "group" : "A"
+          },
+          "axisPlacement" : "auto",
+          "axisLabel" : "",
+          "scaleDistribution" : {
+            "type" : "linear"
+          },
+          "hideFrom" : {
+            "viz" : false,
+            "legend" : false,
+            "tooltip" : false
+          },
+          "thresholdsStyle" : {
+            "mode" : "line"
+          }
+        }
+      },
+      "overrides" : [ ]
+    },
+    "options" : {
+      "tooltip" : {
+        "mode" : "multi",
+        "sort" : "none"
+      },
+      "legend" : {
+        "showLegend" : true,
+        "displayMode" : "list",
+        "placement" : "bottom",
+        "calcs" : [ ]
+      }
+    }
+  } ],
+  "templating" : {
+    "list" : [ ]
+  },
+  "annotations" : {
+    "list" : [ ]
+  },
+  "editable" : true,
+  "fiscalYearStartMonth" : 0,
+  "graphTooltip" : 1,
+  "links" : [ ],
+  "liveNow" : false,
+  "style" : "dark"
+}

@@ -1,3 +1,10 @@
 /k6
 /alertmanager/smtp_auth_password
 /environments/smtp.env
+# Maven
+dashboard-generator/target/
+dashboard-generator/.mvn/
+dashboard-generator/mvnw
+dashboard-generator/mvnw.cmd
+.idea/
+target/
