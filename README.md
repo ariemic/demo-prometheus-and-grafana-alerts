@@ -2,6 +2,9 @@
 
 This document describes the CPU Usage Dashboard and how it was generated using a Java-based observability-as-code approach.
 
+
+> Generated dashboard is accessible in: grafana/dashboards/definitions/cpu-usage-dashboard.json
+
 ## Overview
 
 The **CPU Usage Dashboard** is a Grafana dashboard that monitors CPU usage metrics from Prometheus. It visualizes the `cpu_usage` metric across all instances and provides visual indicators when CPU usage approaches or exceeds the alert threshold of 80%.
