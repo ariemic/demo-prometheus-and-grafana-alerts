@@ -1,70 +1,89 @@
-# Demo Alerting in Prometheus and Grafana 
+# CPU Usage Dashboard
 
-Grafana Alerting is built on the Prometheus Alerting model. This demo project showcases the similarities between Prometheus and Grafana alerting systems, covering topics such as:
+This document describes the CPU Usage Dashboard and how it was generated using a Java-based observability-as-code approach.
 
-- Creating alerts in Prometheus
-- Recreating the same alerts using Grafana
-- Setting up alerts based on Loki logs
-- Exploring alerting components like evaluation groups and notification policies
-- Creating template notifications
-- And more!
+## Overview
 
-This project pairs well with this [Alerting Presentation Template](https://docs.google.com/presentation/d/1XvJnBlNnXUjiS409ABN4NxNkFZoYDmoRKKoJqsvln-g/edit?usp=sharing). Together, they provide an excellent starting point for presenting the Prometheus Alerting model and demonstrating its use in Grafana.
+The **CPU Usage Dashboard** is a Grafana dashboard that monitors CPU usage metrics from Prometheus. It visualizes the `cpu_usage` metric across all instances and provides visual indicators when CPU usage approaches or exceeds the alert threshold of 80%.
 
-## Run the demo environment
+## Dashboard Features
 
-This repository includes a [Docker Compose setup](./docker-compose.yaml) that runs Grafana, Prometheus, Prometheus Alertmanager, Loki, and an SMTP server for testing email notifications.
+- **Time-series visualization**: Displays CPU usage percentage over time for all monitored instances
+- **Alert threshold indicators**: Color-coded thresholds:
+  - Green: 0-60% (Normal)
+  - Yellow: 60-80% (Warning)
+  - Red: 80-100% (Critical - Alert firing)
+- **Auto-refresh**: Updates every 5 seconds
+- **Instance grouping**: Each server instance is displayed as a separate series in the legend
+- **Time range**: Default view shows last 15 minutes
 
-To run the demo environment:
+## Files
+
+- **Dashboard JSON**: `grafana/dashboards/definitions/cpu-usage-dashboard.json`
+- **Java Generator**: `dashboard-generator/src/main/java/com/grafana/dashboard/CpuUsageDashboardGenerator.java`
+- **Maven Configuration**: `dashboard-generator/pom.xml`
+
+## Prerequisites
+
+- **Docker** and **Docker Compose** installed
+- **k6 v1.2.0** or later (for generating test data)
+- **Java 11+** and **Maven** (for regenerating the dashboard)
+
+## Running the Environment
+
+### Start Grafana and Prometheus
+
+To run the demo environment and view the dashboard in your browser:
 
 ```bash
 docker compose up
 ```
 
-You can then access:
-- Grafana: [http://localhost:3000](http://localhost:3000/)
-- Prometheus web UI: [http://localhost:9090](http://localhost:9090/)
-- Alertmanager web UI: [http://localhost:9093](http://localhost:9093/)
+This command starts:
+- **Grafana** - Dashboard platform at [http://localhost:3000](http://localhost:3000/)
+- **Prometheus** - Metrics database at [http://localhost:9090](http://localhost:9090/)
 
-### Generating test data
+Wait a few seconds for the services to start up completely. The dashboard is automatically provisioned and will be available immediately.
 
-This demo uses [Grafana k6](https://grafana.com/docs/k6) to generate test data for Prometheus and Loki.
+### Stop the Environment
 
-The [k6 tests in the `testdata` folder](./testdata/) inject Prometheus metrics and Loki logs that you can use to define alert queries and conditions. 
+To stop the services:
 
-1. Install **k6 v1.2.0** or later.
+```bash
+docker compose down
+```
 
-2. Run a k6 test with the following command:
+## How to Use the Dashboard
 
-    ```bash
-    k6 run testdata/<FILE>.js
-    ```
+### 1. Access the Dashboard
 
-You can modify and run the k6 scripts to simulate different alert scenarios.
-For details on inserting data into Prometheus or Loki, see the `xk6-client-prometheus-remote` and `xk6-loki` APIs.
+Once the Docker containers are running:
 
-### Receive webhook notifications
+1. Navigate to http://localhost:3000
+2. Go to **Dashboards** in the left menu
+3. Look in the **TestFolder** folder
+4. Click on **CPU Usage Dashboard**
 
-One of the simplest ways to receive alert notifications is by using a Webhook.  You can use [`webhook.site`](https://webhook.site/) to create Webhook URLs and view the incoming messages.
+### 2. Generate Test Data
 
-- For Prometheus alertmanager: 
-  
-  Set the Webhook URL to the [alertmanager.yml](./alertmanager/alertmanager.yml) configuration file.
+To see data in the dashboard, run the k6 test script:
 
-- For Grafana:
-  
-  Create a Webhook contact point and assign it to the notification policy.
+```bash
+k6 run testdata/1.cpu-usage.js
+```
 
-### Receive mail notifications
+This script generates CPU usage metrics between 80-100% for a server instance called `server1`, which will trigger the alert threshold visualization.
 
-You can also configure notifications to be sent via your Gmail account using an [App Password](https://support.google.com/accounts/answer/185833?hl=en). After creating your App password:
+### 3. View Alert Behavior
 
-- For Prometheus Alertmanager:
+The dashboard is configured to work with the Prometheus alert rule defined in `prometheus/rules/1.basic.yml`:
 
-  Replace `your_mail@gmail` with your Gmail address in the [alertmanager.yml](./alertmanager/alertmanager.yml) configuration file.
+```yaml
+- alert: HighCPUUsage
+  expr: avg_over_time(cpu_usage[5m])>80
+```
 
-  Copy `alertmanager/smtp_auth_password.example` to `alertmanager/smtp_auth_password` and set your password.
-
-- For Grafana:
-
-  Copy `environments/smpt.env.example` to `environments/smpt.env` and set the appropriate environment variables values.
+When the 5-minute average CPU usage exceeds 80%, you'll see:
+- The time-series line turn **red**
+- The metric values displayed in red in the legend
+- The alert firing in Prometheus (http://localhost:9090/alerts)
